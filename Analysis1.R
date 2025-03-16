@@ -81,29 +81,13 @@ ggplot(film_clean, aes(x = rating_group, y = rating, fill = rating_group)) +
   labs(title = "IMDB Rating by Rating Group", x = "Rating Group", y = "IMDB Rating") 
 
 
-
-#Model selection
-
 #Creating a binary variable 'rating_above_7' 
 film_clean$rating_above_7 <- ifelse(film_clean$rating > 7, 1, 0)
 film_clean$genre <- as.factor(film_clean$genre) 
 
-#Principal Component Analysis (PCA)
-film_clean$genre_num <- as.numeric(film_clean$genre)
-film2<-film_clean%>%
-  select(year,length,budget,votes,genre_num)
-film2.pca<-princomp(film2, cor=T)
-summary(film2.pca)
-film2.pca_scores <- film2.pca$scores
-#Combine PCA scores with the binary variable for modeling
-film2.pca_scores<- as.data.frame(film2.pca_scores)
-film2_pca <- cbind(film2.pca_scores, rating_above_7 = film_clean$rating_above_7)
-#Logistic GLM using PCA components
-model <- glm(rating_above_7~., data = film2_pca,family = binomial(link = "logit"))
-summary(model)
-
-
 #logistic GLM
 logistic_model <- glm(rating_above_7 ~ year+budget + length + votes + genre, data = film_clean, family = binomial(link = "logit"))
 summary(logistic_model)
+
+
 
