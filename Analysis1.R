@@ -40,6 +40,11 @@ ggplot(film_clean, aes(x = votes, y = rating)) +
   geom_point(alpha = 0.5) +
   labs(title = "Votes vs IMDB Rating", x = "Number of Votes", y = "IMDB Rating")+
   geom_hline(yintercept = 7, linetype = "dashed", color = "red", size = 1)
+#Scatterplot  of Log(Votes) vs Rating
+ggplot(film_clean, aes(x = log(votes), y = rating)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Log(Votes) vs IMDB Rating", x = "Log(Votes)", y = "IMDB Rating")+
+  geom_hline(yintercept = 7, linetype = "dashed", color = "red", size = 1)
 
 #Scatterplot of Film Length vs Rating
 ggplot(film_clean, aes(x = length, y = rating)) +
@@ -75,12 +80,29 @@ ggplot(film_clean, aes(x = rating_group, y = rating, fill = rating_group)) +
   geom_boxplot() +
   labs(title = "IMDB Rating by Rating Group", x = "Rating Group", y = "IMDB Rating") 
 
+
+
+#Model selection
+
+# 创建一个新的二元变量 'rating_above_7'
+film_clean$rating_above_7 <- ifelse(film_clean$rating > 7, 1, 0)
+film_clean$genre <- as.factor(film_clean$genre) 
+
 #PCA
+film_clean$genre_num <- as.numeric(film_clean$genre)
+film2<-film_clean%>%
+  select(year,length,budget,votes,genre_num)
+film2.pca<-princomp(film2, cor=T)
+summary(film2.pca)
+film2.pca_scores <- film2.pca$scores
+
+film2.pca_scores<- as.data.frame(film2.pca_scores)
+film2_pca <- cbind(film2.pca_scores, rating_above_7 = film_clean$rating_above_7)
+model <- glm(rating_above_7~ year+ budget + length + votes + genre, data = film2_pca,family = binomial(link = "logit"))
+summary(model)
 
 
 #logistic GLM
-film_clean$rating_above_7 <- ifelse(film_clean$rating > 7, 1, 0)
-film_clean$genre <- factor(film_clean$genre) 
-logistic_model <- glm(rating_above_7 ~ budget + length + votes + genre, data = film_clean, family = binomial(link = "logit"))
+logistic_model <- glm(rating_above_7 ~ year+budget + length + votes + genre, data = film_clean, family = binomial(link = "logit"))
 summary(logistic_model)
 
