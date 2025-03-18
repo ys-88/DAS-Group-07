@@ -1,0 +1,144 @@
+---
+title: "Analysis of the properties influencing film rating over 7"
+subtitle: "student number: 3026884, 2995341, 2897872, 2971937"
+number-sections: true
+format: 
+  html:
+    embed-resources: true
+    code-tools: true
+  pdf: default
+editor_options: 
+  chunk_output_type: console
+execute:
+  echo: true
+  eval: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+library(moderndive)
+library(skimr)
+```
+
+# Introduction
+
+```{r}
+#| label: data
+film <- read.csv("C:/Users/86150/Desktop/dataset07.csv")
+View(film)
+head(film)
+glimpse(film)
+summary(film)
+#Use the median to fill in missing values (NA) 
+film_clean <- film %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), median(., na.rm = TRUE), .)))
+film_clean %>%
+  select(year,length,budget,votes,rating)%>%
+  cor()
+```
+
+# Exploratory data analysis
+
+```{r}
+#Histograms of IMDB ratings 
+ggplot(film_clean, aes(x = rating)) +
+  geom_histogram(binwidth = 0.5, fill = "steelblue", color = "black") +
+  labs(x = "IMDB Rating", y = "Frequency", title = "Distribution of IMDB Ratings")
+
+```
+
+```{r}
+#Barplot of Film Counts by Genre
+ggplot(film_clean, aes(x = factor(genre))) +
+  geom_bar(fill = "skyblue", color = "black") +
+  labs(x = "Genre", y = "Count of Films", title = "Count of Films by Genre")
+
+```
+
+```{r}
+#Scatterplot of Budget vs Rating
+ggplot(film_clean, aes(x = budget, y = rating)) +
+  geom_point(color = "steelblue") +
+  labs(x = "Budget (Millions)", y = "IMDB Rating", title = "Rating vs Budget")+
+  geom_hline(yintercept = 7, linetype = "dashed", color = "red", size = 1)
+```
+
+```{r}
+#Scatterplot of Votes vs Rating
+ggplot(film_clean, aes(x = votes, y = rating)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Votes vs IMDB Rating", x = "Number of Votes", y = "IMDB Rating")+
+  geom_hline(yintercept = 7, linetype = "dashed", color = "red", size = 1)
+
+```
+
+```{r}
+#Scatterplot  of Log(Votes) vs Rating
+ggplot(film_clean, aes(x = log(votes), y = rating)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Log(Votes) vs IMDB Rating", x = "Log(Votes)", y = "IMDB Rating")+
+  geom_hline(yintercept = 7, linetype = "dashed", color = "red", size = 1)
+```
+
+```{r}
+#Scatterplot of Film Length vs Rating
+ggplot(film_clean, aes(x = length, y = rating)) +
+  geom_point(alpha = 0.5) +
+  labs(title = " Film Length vs IMDB Rating", x = " Film Length (Minutes)", y = "IMDB Rating")+
+  geom_hline(yintercept = 7, linetype = "dashed", color = "red", size = 1)
+
+```
+
+```{r}
+#Boxplot of Year vs Rating by duration
+film_clean$year_group <- cut(film_clean$year, 
+                             breaks = c(1894, 1904, 1914, 1924, 1934, 1944, 1954, 1964, 1974, 1984, 1994,2006), 
+                             labels = c(1:11),right=FALSE)  
+ggplot(film_clean, aes(x = year_group, y = rating, fill = year_group)) +
+  geom_boxplot(na.rm = TRUE) +
+  labs(title = "IMDB Rating by Year Group", x = "Year Group", y = "IMDB Rating") +
+  geom_hline(yintercept = 7, linetype = "dashed", color = "red", size = 1)+
+  scale_fill_discrete(name = "Year Group", 
+                      labels = c("1894-1904", 
+                                 "1904-1914", 
+                                 "1914-1924", 
+                                 "1924-1934", 
+                                 "1934-1944", 
+                                 "1944-1954", 
+                                 "1954-1964", 
+                                 "1964-1974", 
+                                 "1974-1984", 
+                                 "1984-1994", 
+                                 "1994-2005")) 
+
+```
+
+```{r}
+# Boxplot of Binary rating
+film_clean$rating_group <- ifelse(film_clean$rating > 7, "Above 7", "Below or Equal to 7")
+ggplot(film_clean, aes(x = rating_group, y = rating, fill = rating_group)) +
+  geom_boxplot() +
+  labs(title = "IMDB Rating by Rating Group", x = "Rating Group", y = "IMDB Rating") 
+
+```
+
+```{r}
+#Creating a binary variable 'rating_above_7' 
+film_clean$rating_above_7 <- ifelse(film_clean$rating > 7, 1, 0)
+film_clean$genre <- as.factor(film_clean$genre) 
+
+```
+
+```{r}
+#logistic GLM
+logistic_model <- glm(rating_above_7 ~ year+budget + length + votes + genre, data = film_clean, family = binomial(link = "logit"))
+summary(logistic_model)
+```
