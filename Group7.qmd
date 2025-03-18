@@ -26,13 +26,16 @@ library(ggplot2)
 library(readr)
 library(moderndive)
 library(skimr)
+library(rpart)  
+library(rpart.plot)
+library(randomForest)
 ```
 
 # Introduction
 
 ```{r}
 #| label: data
-film <- read.csv("C:/Users/86150/Desktop/dataset07.csv")
+film <- read.csv("dataset07.csv")
 View(film)
 head(film)
 glimpse(film)
@@ -130,6 +133,9 @@ ggplot(film_clean, aes(x = rating_group, y = rating, fill = rating_group)) +
 
 ```
 
+
+
+# Formal analysis
 ```{r}
 #Creating a binary variable 'rating_above_7' 
 film_clean$rating_above_7 <- ifelse(film_clean$rating > 7, 1, 0)
@@ -142,3 +148,22 @@ film_clean$genre <- as.factor(film_clean$genre)
 logistic_model <- glm(rating_above_7 ~ year+budget + length + votes + genre, data = film_clean, family = binomial(link = "logit"))
 summary(logistic_model)
 ```
+
+```{r}
+# Decision Tree Model
+tree_model <- rpart(rating_above_7 ~ year + length + budget + votes + genre, 
+                    data = film_clean, method = "class")
+rpart.plot(tree_model, type=2, extra=4) #visualise the tree
+```
+
+```{r}
+#Random Forest Model
+rf_model <- randomForest(rating_above_7~ year + length + budget + votes + genre, 
+                         data = film_clean, ntree = 500, importance = TRUE)
+print(rf_model)
+importance(rf_model)
+varImpPlot(rf_model)
+```
+
+
+
