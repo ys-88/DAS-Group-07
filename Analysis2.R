@@ -57,6 +57,7 @@ summary(PCA_model)
 #logistic GLM
 logistic_model <- glm(rating_binary ~ year+budget + length + votes + genre, data = film3, family = binomial(link = "logit"))
 summary(logistic_model)
+#333
 
 
 
