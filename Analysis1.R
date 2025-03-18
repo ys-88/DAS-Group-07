@@ -88,6 +88,6 @@ film_clean$genre <- as.factor(film_clean$genre)
 #logistic GLM
 logistic_model <- glm(rating_above_7 ~ year+budget + length + votes + genre, data = film_clean, family = binomial(link = "logit"))
 summary(logistic_model)
-
+#
 
 
