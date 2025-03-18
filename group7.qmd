@@ -1,0 +1,49 @@
+---
+title: " Data Analysis Skills: project2"
+number-sections: true
+format: 
+  html:
+    embed-resources: true
+    code-tools: true
+  pdf: default
+editor_options: 
+  chunk_output_type: console
+bibliography: references.bib
+---
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+library(moderndive)
+library(skimr)
+```
+
+# Introduction
+
+```{r}
+#| label: data
+film <- read.csv("C:/Users/86150/Desktop/dataset07.csv")
+View(film)
+head(film)
+glimpse(film)
+summary(film)
+#Use the median to fill in missing values (NA) 
+film_clean <- film %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), median(., na.rm = TRUE), .)))
+film_clean %>%
+  select(year,length,budget,votes,rating)%>%
+  cor()
+```
+
+# Exploratory data analysis {#sec-eda}
+
+```{r}
+
+
+```
+
