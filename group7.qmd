@@ -150,13 +150,9 @@ film$rating_binary <- ifelse(film$rating > 7, 1, 0)
 ## Correlation Analysis
 
 ```{r}
-film <- film %>%
-  mutate(across(where(is.character), as.numeric))
-
 corr_matrix <- film %>%
-  select(where(is.numeric)) %>% 
+  dplyr::select(where(is.numeric)) %>% 
   cor(use = "complete.obs")
-
 corrplot(corr_matrix, method = "circle")
 ```
 
@@ -190,7 +186,8 @@ vif_values
 ## Principal Component Analysis (If Needed)
 
 ```{r}
-film_numeric <- film %>% select(year, length, budget, votes)
+film_numeric <- film %>% 
+  dplyr::select(year, length, budget, votes)
 pca <- prcomp(film_numeric, center = TRUE, scale = TRUE)
 summary(pca)
 ```
