@@ -54,7 +54,7 @@ film <- film %>%
 # Convert categorical variables
 film$genre <- as.factor(film$genre)
 
-#我试了一下，直接把缺失值删掉的模型AIC更低。
+
 # I tried to just list-wise deleted the missing value, and the models based on this method has lower AICs.
 ```
 
@@ -68,12 +68,12 @@ ggplot(film, aes(x = rating)) +
   geom_histogram(binwidth = 0.1, fill = "steelblue", color = "black") +
   labs(x = "IMDB Rating", y = "Frequency", title = "Distribution of IMDB Ratings") +
   scale_x_continuous(breaks = seq(0, 10, by = 1))
-#这个图的x轴刻度有点少，我稍微增加了一些，我还把每个bar的width搞得小了一点（修改图在下面）。
+#
 #The x-axis of this chart had too few tick marks, so I added a few more. I also made each bar slightly narrower (modified plot below).
 ```
 
 ```{r}
-#改
+#
 #modified plot
 ggplot(film, aes(x = rating)) +
   geom_histogram(binwidth = 0.1, fill = "steelblue", color = "black") +
@@ -120,7 +120,7 @@ ggplot(film, aes(x = length, y = rating)) +
   geom_point(alpha = 0.5) +
   labs(title = " Film Length vs IMDB Rating", x = " Film Length (Minutes)", y = "IMDB Rating")+
   geom_hline(yintercept = 7, linetype = "dashed", color = "red", size = 1)
-# 通过这个图我们可以看出，所有的数据其实分成了两部分，一部分是短片，一部分是长片。所以我觉得可以新设立一个变量为long_film，低于40分钟为短片，高于40分钟为长片。在genre里也有short这个分类，但其实有被分到其他类别的电影也低于40分钟，甚至只有几分钟。在下面的代码块里我展示了低于40分钟的电影在不同的genre里的数量。
+
 # From this plot, we can see that all the data is actually divided into two groups: one for short films and one for long films. So I think we can introduce a new variable, long_film, where films shorter than 40 minutes are classified as short films, and those longer than 40 minutes as long films. Although the genre category includes "Short," some films that belong to other genres are also under 40 minutes, or even just a few minutes long. In the code block below, I show the number of films under 40 minutes across different genres.
 
 ```
@@ -129,7 +129,7 @@ ggplot(film, aes(x = length, y = rating)) +
 film %>%
   filter(length < 40) %>%
   count(genre)
-# 设新的变量的代码如下，如果设了这个变量之后，后续的代码需要微调：
+# 
 # The code for creating this new variable is as follows. If this variable is added, some adjustments to the subsequent code may be needed:
  film1 <- film %>% mutate(long_film = ifelse(length < 40, "short", "long"))
 ```
@@ -180,12 +180,12 @@ corr_matrix <- film %>%
   dplyr::select(where(is.numeric)) %>% 
   cor(use = "complete.obs")
 corrplot(corr_matrix, method = "circle")
-#这个matrix没有相关系数的数值，不是很直观，因此我在下面这个版本的matrix里同时有颜色和数值（修改图在下面）。
+
 #This matrix does not display the correlation values, making it less intuitive. So, in the modified version below, I included both colors and numerical values (modified plot below).
 ```
 
 ```{r}
-#改 modified plot
+# modified plot
 ggcorr(film, label = TRUE, label_round = 2, low = "blue", high = "red")
 ```
 
@@ -210,7 +210,7 @@ summary(stepwise_model)
 ```
 
 ```{r}
-# 这个代码框是加上了新的变量（long_film) 之后的新模型，可以对比一下之前模型。
+
 # This code block presents the new model after adding the long_film variable, so you can compare it with the previous model.
 new_model <- glm(rating_binary ~ length + budget + votes + genre + long_film, data = film1, family = binomial)
 ```
